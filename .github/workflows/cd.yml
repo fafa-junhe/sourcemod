@@ -101,8 +101,7 @@ jobs:
             - name: Upload build artifacts
               uses: actions/upload-artifact@v4
               with:
-                  name: sourcemod-${{ matrix.os_short }}-${{ matrix.compiler_cc }}-${{ github.sha }}
-                  name: sourcemod-${{ matrix.os_short }}-${{ matrix.compiler_cc }}
+                  name: sourcemod-${{ matrix.os }}-${{ matrix.compiler_cc }}
                   path: sourcemod/build/package/
                   retention-days: 30
                   if-no-files-found: error
@@ -111,8 +110,7 @@ jobs:
               if: always()
               uses: actions/upload-artifact@v4
               with:
-                  name: build-logs-${{ matrix.os_short }}-${{ matrix.compiler_cc }}-${{ github.sha }}
-                  name: build-logs-${{ matrix.os_short }}-${{ matrix.compiler_cc }}
+                  name: build-logs-${{ matrix.os }}-${{ matrix.compiler_cc }}
                   path: |
                       sourcemod/build/*.log
                       sourcemod/build/**/*.log
