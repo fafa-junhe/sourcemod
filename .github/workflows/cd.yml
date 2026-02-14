@@ -102,6 +102,13 @@ jobs:
                   ${{ matrix.compiler_cc }} --version
                   ${{ matrix.compiler_cxx }} --version
 
+            # Set compiler flags for debug builds to suppress hl2sdk warnings
+            - name: Set debug build flags
+              if: env.BUILD_TYPE == 'debug'
+              run: |
+                  echo "CFLAGS=-O3 -Wno-error" >> $GITHUB_ENV
+                  echo "CXXFLAGS=-O3 -Wno-error" >> $GITHUB_ENV
+
             - name: Build
               working-directory: sourcemod
               run: |
