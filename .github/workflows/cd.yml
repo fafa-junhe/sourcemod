@@ -26,10 +26,22 @@ jobs:
                       os_short: linux
                       compiler_cc: clang-14
                       compiler_cxx: clang++-14
+                    # Debug builds
+                    - os: ubuntu-latest
+                      os_short: linux
+                      compiler_cc: clang
+                      compiler_cxx: clang++
+                      build_type: debug
+                    - os: ubuntu-22.04
+                      os_short: linux
+                      compiler_cc: clang-14
+                      compiler_cxx: clang++-14
+                      build_type: debug
             fail-fast: false
         runs-on: ${{ matrix.os }}
-        name: ${{ matrix.os_short }}-${{ matrix.compiler_cc }}
+        name: ${{ matrix.os_short }}-${{ matrix.compiler_cc }}${{ matrix.build_type == 'debug' && '-debug' || '' }}
         env:
+            BUILD_TYPE: ${{ matrix.build_type || 'release' }}
             SDKS: '["episode1","css","tf2","l4d2","csgo","dods"]'
             ARCH: x86,x86_64
             DEPENDENCIES_FOLDER: dependencies
@@ -95,13 +107,13 @@ jobs:
               run: |
                   mkdir build
                   cd build
-                  python ../configure.py --enable-optimize --sdks=${{ join(fromJSON(env.SDKS)) }} --targets=${{ env.ARCH }} --mms-path=${{ env.DEPENDENCIES_ROOT }}/mmsource-${{ env.MMSOURCE_VERSION }} --hl2sdk-root=${{ env.DEPENDENCIES_ROOT }} --mysql-path=${{ env.DEPENDENCIES_ROOT }}/mysql-${{ env.MYSQL_VERSION }} --mysql64-path=${{ env.DEPENDENCIES_ROOT }}/mysql-${{ env.MYSQL_VERSION }}-x86_64
+                  python ../configure.py ${{ env.BUILD_TYPE == 'debug' && '--enable-debug' || '--enable-optimize' }} --sdks=${{ join(fromJSON(env.SDKS)) }} --targets=${{ env.ARCH }} --mms-path=${{ env.DEPENDENCIES_ROOT }}/mmsource-${{ env.MMSOURCE_VERSION }} --hl2sdk-root=${{ env.DEPENDENCIES_ROOT }} --mysql-path=${{ env.DEPENDENCIES_ROOT }}/mysql-${{ env.MYSQL_VERSION }} --mysql64-path=${{ env.DEPENDENCIES_ROOT }}/mysql-${{ env.MYSQL_VERSION }}-x86_64
                   ambuild
 
             - name: Upload build artifacts
               uses: actions/upload-artifact@v4
               with:
-                  name: sourcemod-${{ matrix.os_short }}-${{ matrix.compiler_cc }}
+                  name: sourcemod-${{ matrix.os_short }}-${{ matrix.compiler_cc }}${{ matrix.build_type == 'debug' && '-debug' || '' }}
                   path: sourcemod/build/package/
                   retention-days: 30
                   if-no-files-found: error
@@ -110,7 +122,7 @@ jobs:
               if: always()
               uses: actions/upload-artifact@v4
               with:
-                  name: build-logs-${{ matrix.os_short }}-${{ matrix.compiler_cc }}
+                  name: build-logs-${{ matrix.os_short }}-${{ matrix.compiler_cc }}${{ matrix.build_type == 'debug' && '-debug' || '' }}
                   path: |
                       sourcemod/build/*.log
                       sourcemod/build/**/*.log
